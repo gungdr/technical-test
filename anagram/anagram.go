@@ -22,7 +22,6 @@ func anagramGroup(words []string) [][]string {
 }
 
 func Run() {
-	// ['kita', 'atik', 'tika', 'aku', 'kia', 'makan', 'kua']
 	words := []string{
 		"kita",
 		"atik",
