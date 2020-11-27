@@ -1,7 +1,7 @@
 # Technical Test
 
 This is a repository to hold technical test requirments
-1. [simple query](simple)
+1. [simple query](query)
 2. [microservice](microservice)
 3. [refactor](refactor)
 4. [logic](logic) 
