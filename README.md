@@ -9,6 +9,7 @@ This project is written in `go v1.15`
 ## Installation
 
 I use Makefile to run script for the project
+You can find the Makefile on `/microservice`
 
 ### Dependencies
 
