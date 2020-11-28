@@ -12,7 +12,30 @@ type SearchResult struct {
 	*Result
 }
 
+func (s SearchResult) ToProto() *proto.SearchResult {
+	movieResultProto := []*proto.MovieResult{}
+	for _, item := range s.Search {
+		movieResultProto = append(movieResultProto, item.ToProto())
+	}
+	var err string
+	if s.Error != nil {
+		err = *s.Error
+	}
+	return &proto.SearchResult{
+		Search:       movieResultProto,
+		TotalResults: s.TotalResults,
+		Response:     s.Response,
+		Error:        err,
+	}
+}
+
 type IMDBID string
+
+func (i IMDBID) ToMap() map[string]string {
+	return map[string]string{
+		"i": string(i),
+	}
+}
 
 type MovieResult struct {
 	Title  string `json:"title"`
@@ -22,9 +45,26 @@ type MovieResult struct {
 	Poster string `json:"poster"`
 }
 
+func (m MovieResult) ToProto() *proto.MovieResult {
+	return &proto.MovieResult{
+		Title:  m.Title,
+		Year:   m.Year,
+		ImdbId: string(m.IMDBID),
+		Type:   m.Type,
+		Poster: m.Poster,
+	}
+}
+
 type Rating struct {
 	Source string `json:"Source"`
 	Value  string `json:"Value"`
+}
+
+func (r Rating) ToProto() *proto.Rating {
+	return &proto.Rating{
+		Source: r.Source,
+		Value:  r.Value,
+	}
 }
 
 type MovieDetailResult struct {
@@ -53,39 +93,6 @@ type MovieDetailResult struct {
 	Production string   `json:"Production"`
 	Website    string   `json:"Website"`
 	*Result
-}
-
-func (i IMDBID) ToMap() map[string]string {
-	return map[string]string{
-		"i": string(i),
-	}
-}
-
-func (s SearchResult) ToProto() *proto.SearchResult {
-	movieResultProto := []*proto.MovieResult{}
-	for _, item := range s.Search {
-		movieResultProto = append(movieResultProto, item.ToProto())
-	}
-	var err string
-	if s.Error != nil {
-		err = *s.Error
-	}
-	return &proto.SearchResult{
-		Search:       movieResultProto,
-		TotalResults: s.TotalResults,
-		Response:     s.Response,
-		Error:        err,
-	}
-}
-
-func (m MovieResult) ToProto() *proto.MovieResult {
-	return &proto.MovieResult{
-		Title:  m.Title,
-		Year:   m.Year,
-		ImdbId: string(m.IMDBID),
-		Type:   m.Type,
-		Poster: m.Poster,
-	}
 }
 
 func (m MovieDetailResult) ToProto() *proto.MovieDetailResult {
@@ -124,12 +131,5 @@ func (m MovieDetailResult) ToProto() *proto.MovieDetailResult {
 		Website:    m.Website,
 		Response:   m.Response,
 		Error:      err,
-	}
-}
-
-func (r Rating) ToProto() *proto.Rating {
-	return &proto.Rating{
-		Source: r.Source,
-		Value:  r.Value,
 	}
 }
