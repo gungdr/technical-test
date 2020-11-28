@@ -1,8 +1,10 @@
 package movie
 
+import "context"
+
 type Service interface {
-	Get(id IMDBID) (*MovieDetailResult, error)
-	Search(param Param) (*SearchResult, error)
+	Get(ctx context.Context, id IMDBID) (*MovieDetailResult, error)
+	Search(ctx context.Context, param Param) (*SearchResult, error)
 }
 
 type service struct {
@@ -15,16 +17,16 @@ func NewService(client Client) Service {
 	}
 }
 
-func (s *service) Get(id IMDBID) (*MovieDetailResult, error) {
-	result, err := s.client.Get(id.ToMap())
+func (s *service) Get(ctx context.Context, id IMDBID) (*MovieDetailResult, error) {
+	result, err := s.client.Get(ctx, id.ToMap())
 	if err != nil {
 		return nil, err
 	}
 	return result, nil
 }
 
-func (s *service) Search(param Param) (*SearchResult, error) {
-	result, err := s.client.Search(param.ToMap())
+func (s *service) Search(ctx context.Context, param Param) (*SearchResult, error) {
+	result, err := s.client.Search(ctx, param.ToMap())
 	if err != nil {
 		return nil, err
 	}

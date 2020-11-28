@@ -15,7 +15,7 @@ func main() {
 	conf := config.New()
 	movieClient := movie.NewClient(conf)
 	movieService := movie.NewService(movieClient)
-	movieServer := movie.NewServer(rpcServer, movieService)
+	movieServer := movie.NewServer(rpcServer, conf, movieService)
 	movieServer.Run()
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", conf.Port))
 	if err != nil {

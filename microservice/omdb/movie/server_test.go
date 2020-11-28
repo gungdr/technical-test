@@ -1,39 +1,61 @@
 package movie
 
 import (
+	"context"
+	"log"
+	"net"
 	"omdb/config"
 	"omdb/proto"
 	"testing"
+	"time"
+
+	"google.golang.org/grpc/test/bufconn"
 
 	"google.golang.org/grpc"
 )
 
-var svr Server
+var omdbClient proto.OMDBServiceClient
+
+const bufSize = 1024 * 1024
+
+var lis *bufconn.Listener
 
 func init() {
-	cfg := config.New()
-	client := NewClient(cfg)
-	service := NewService(client)
 	rpcServer := grpc.NewServer()
-	svr = NewServer(rpcServer, service)
-	svr.Run()
+	conf := config.New()
+	movieClient := NewClient(conf)
+	movieService := NewService(movieClient)
+	movieServer := NewServer(rpcServer, conf, movieService)
+	movieServer.Run()
+	lis = bufconn.Listen(bufSize)
+	go func() {
+		if err := rpcServer.Serve(lis); err != nil {
+			log.Fatalf("Server exited with error: %v", err)
+		}
+	}()
+}
+
+func bufDialer(context.Context, string) (net.Conn, error) {
+	return lis.Dial()
 }
 
 func Test_server_Search(t *testing.T) {
+	ctx := context.Background()
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
+	if err != nil {
+		t.Fatalf("Failed to dial bufnet: %v", err)
+	}
+	defer conn.Close()
+	omdbClient := proto.NewOMDBServiceClient(conn)
+
 	param := &proto.Param{
 		Keyword: "kill",
-		Page:    10,
+		Page:    1,
 	}
-	_, err := svr.Search(param)
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	defer cancel()
+	_, err = omdbClient.Search(ctx, param)
 	if err != nil {
-		t.Error(err)
-	}
-	param = &proto.Param{
-		Keyword: "kill",
-		Page:    0,
-	}
-	_, err = svr.Search(param)
-	if err == nil {
-		t.Error("should have error")
+		log.Fatalf("could not greet: %v", err)
 	}
 }

@@ -1,6 +1,7 @@
 package movie
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"log"
@@ -11,8 +12,8 @@ import (
 )
 
 type Client interface {
-	Search(param map[string]string) (*SearchResult, error)
-	Get(id map[string]string) (*MovieDetailResult, error)
+	Search(ctx context.Context, param map[string]string) (*SearchResult, error)
+	Get(ctx context.Context, id map[string]string) (*MovieDetailResult, error)
 }
 
 type client struct {
@@ -33,7 +34,7 @@ func NewClient(conf *config.Config) Client {
 	}
 }
 
-func (c *client) Search(param map[string]string) (*SearchResult, error) {
+func (c *client) Search(ctx context.Context, param map[string]string) (*SearchResult, error) {
 	param["apikey"] = c.config.OMDBAPIKey
 	response, err := c.resty.R().SetQueryParams(param).
 		Get("/")
@@ -52,7 +53,7 @@ func (c *client) Search(param map[string]string) (*SearchResult, error) {
 	return result, nil
 }
 
-func (c *client) Get(param map[string]string) (*MovieDetailResult, error) {
+func (c *client) Get(ctx context.Context, param map[string]string) (*MovieDetailResult, error) {
 	param["apikey"] = c.config.OMDBAPIKey
 	response, err := c.resty.R().SetQueryParams(param).
 		Get("/")
