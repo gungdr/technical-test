@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"log"
 	"net"
 	"omdb/config"
@@ -14,27 +13,26 @@ import (
 )
 
 type rpcServer struct {
-	grpc    *grpc.Server
-	config  *config.Config
-	service movie.Service
+	grpc     *grpc.Server
+	config   *config.Config
+	service  movie.Service
+	listener net.Listener
 	proto.UnimplementedOMDBServiceServer
 }
 
-func NewRPCServer(grpc *grpc.Server, conf *config.Config, service movie.Service) Server {
+func NewRPCServer(grpc *grpc.Server, conf *config.Config, listener net.Listener, service movie.Service) Server {
 	return &rpcServer{
-		config:  conf,
-		grpc:    grpc,
-		service: service,
+		config:   conf,
+		grpc:     grpc,
+		service:  service,
+		listener: listener,
 	}
 }
 func (s *rpcServer) Run() {
 	log.Printf("RPC Server is starting on Port:%d\n", s.config.RPCPort)
 	proto.RegisterOMDBServiceServer(s.grpc, s)
-	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", s.config.RPCPort))
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
-	if err := s.grpc.Serve(lis); err != nil {
+
+	if err := s.grpc.Serve(s.listener); err != nil {
 		log.Fatalf("failed to serve: %v", err)
 	}
 }

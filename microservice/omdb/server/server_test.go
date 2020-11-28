@@ -2,57 +2,46 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"log"
+	"net"
 	"omdb/config"
 	"omdb/movie"
 	"omdb/proto"
 	"testing"
 	"time"
 
+	"google.golang.org/grpc/test/bufconn"
+
 	"google.golang.org/grpc"
 )
 
 var omdbClient proto.OMDBServiceClient
 
-// const bufSize = 1024 * 1024
+const bufSize = 1024 * 1024
 
-// var lis *bufconn.Listener
-var conf *config.Config
+var lis *bufconn.Listener
 
 func init() {
 	rpcServer := grpc.NewServer()
-	conf = config.New()
+	conf := config.New()
+	lis = bufconn.Listen(bufSize)
 	movieClient := movie.NewClient(conf)
 	movieService := movie.NewService(movieClient)
-	movieServer := NewRPCServer(rpcServer, conf, movieService)
-	movieServer.Run()
-
-	// conn, err := grpc.Dial(fmt.Sprintf("http://localhost:%d", conf.RPCPort), grpc.WithInsecure(), grpc.WithBlock())
-	// if err != nil {
-	// 	log.Fatalf("did not connect: %v", err)
-	// }
-	// defer conn.Close()
-	// // lis = bufconn.Listen(bufSize)
-	// go func() {
-	// 	if err := rpcServer.Serve(lis); err != nil {
-	// 		log.Fatalf("Server exited with error: %v", err)
-	// 	}
-	// }()
+	movieServer := NewRPCServer(rpcServer, conf, lis, movieService)
+	go movieServer.Run()
 }
 
-// func bufDialer(context.Context, string) (net.Conn, error) {
-// 	return lis.Dial()
-// }
+func bufDialer(context.Context, string) (net.Conn, error) {
+	return lis.Dial()
+}
 
 func Test_server_Search(t *testing.T) {
 	ctx := context.Background()
-	conn, err := grpc.Dial(fmt.Sprintf("http://localhost:%d", conf.RPCPort), grpc.WithInsecure(), grpc.WithBlock())
+	conn, err := grpc.DialContext(ctx, "bufnet", grpc.WithContextDialer(bufDialer), grpc.WithInsecure())
 	if err != nil {
-		log.Fatalf("did not connect: %v", err)
+		t.Fatalf("Failed to dial bufnet: %v", err)
 	}
 	defer conn.Close()
-
 	omdbClient := proto.NewOMDBServiceClient(conn)
 
 	param := &proto.Param{
