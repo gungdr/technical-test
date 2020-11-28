@@ -25,7 +25,7 @@ func init() {
 	conf := config.New()
 	movieClient := NewClient(conf)
 	movieService := NewService(movieClient)
-	movieServer := NewServer(rpcServer, conf, movieService)
+	movieServer := NewRPCServer(rpcServer, conf, movieService)
 	movieServer.Run()
 	lis = bufconn.Listen(bufSize)
 	go func() {
@@ -52,7 +52,7 @@ func Test_server_Search(t *testing.T) {
 		Keyword: "kill",
 		Page:    1,
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Second)
 	defer cancel()
 	_, err = omdbClient.Search(ctx, param)
 	if err != nil {

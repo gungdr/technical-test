@@ -12,7 +12,8 @@ var (
 )
 
 type Config struct {
-	Port       int    `json:"PORT" default:"3000"`
+	RPCPort    int    `json:"PORT" default:"3000"`
+	RestPort   int    `json:"PORT" default:"4000"`
 	OMDBHost   string `json:"OMDB_HOST" default:"https://www.omdbapi.com/"`
 	OMDBAPIKey string `json:"OMDB_API_KEY" default:"faf7e5bb"`
 }
