@@ -1,4 +1,4 @@
-package movie
+package server
 
 type Server interface {
 	Run()

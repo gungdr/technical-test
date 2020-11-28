@@ -3,6 +3,7 @@ package main
 import (
 	"omdb/config"
 	"omdb/movie"
+	"omdb/server"
 
 	"github.com/gin-gonic/gin"
 	"google.golang.org/grpc"
@@ -14,9 +15,9 @@ func main() {
 	conf := config.New()
 	movieClient := movie.NewClient(conf)
 	movieService := movie.NewService(movieClient)
-	movieRPCServer := movie.NewRPCServer(rpcServer, conf, movieService)
-	movieRestServer := movie.NewRestServer(router, conf, movieService)
-	movieRPCServer.Run()
+	movieRPCServer := server.NewRPCServer(rpcServer, conf, movieService)
+	movieRestServer := server.NewRestServer(router, conf, movieService)
+	go movieRPCServer.Run()
 	movieRestServer.Run()
 
 }

@@ -1,8 +1,10 @@
-package movie
+package server
 
 import (
+	"fmt"
 	"log"
 	"omdb/config"
+	"omdb/movie"
 
 	"github.com/gin-gonic/gin"
 )
@@ -10,10 +12,10 @@ import (
 type restServer struct {
 	router  *gin.Engine
 	config  *config.Config
-	service Service
+	service movie.Service
 }
 
-func NewRestServer(router *gin.Engine, conf *config.Config, service Service) Server {
+func NewRestServer(router *gin.Engine, conf *config.Config, service movie.Service) Server {
 	return &restServer{
 		router:  router,
 		config:  conf,
@@ -22,5 +24,5 @@ func NewRestServer(router *gin.Engine, conf *config.Config, service Service) Ser
 }
 func (s *restServer) Run() {
 	log.Printf("REST Server is starting on Port :%d ...\n", s.config.RestPort)
-	s.router.Run()
+	s.router.Run(fmt.Sprintf(":%d", s.config.RestPort))
 }

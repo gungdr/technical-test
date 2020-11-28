@@ -1,4 +1,4 @@
-package movie
+package server
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"omdb/config"
+	"omdb/movie"
 	"omdb/proto"
 
 	pbwrapper "github.com/golang/protobuf/ptypes/wrappers"
@@ -15,11 +16,11 @@ import (
 type rpcServer struct {
 	grpc    *grpc.Server
 	config  *config.Config
-	service Service
+	service movie.Service
 	proto.UnimplementedOMDBServiceServer
 }
 
-func NewRPCServer(grpc *grpc.Server, conf *config.Config, service Service) Server {
+func NewRPCServer(grpc *grpc.Server, conf *config.Config, service movie.Service) Server {
 	return &rpcServer{
 		config:  conf,
 		grpc:    grpc,
@@ -39,7 +40,7 @@ func (s *rpcServer) Run() {
 }
 
 func (s *rpcServer) Search(ctx context.Context, param *proto.Param) (*proto.SearchResult, error) {
-	searchParam := new(Param)
+	searchParam := new(movie.Param)
 	searchParam.FromProto(param)
 	result, err := s.service.Search(ctx, *searchParam)
 	if err != nil {
@@ -49,7 +50,7 @@ func (s *rpcServer) Search(ctx context.Context, param *proto.Param) (*proto.Sear
 }
 
 func (s *rpcServer) Get(ctx context.Context, id *pbwrapper.StringValue) (*proto.MovieDetailResult, error) {
-	result, err := s.service.Get(ctx, IMDBID((*id).Value))
+	result, err := s.service.Get(ctx, movie.IMDBID((*id).Value))
 	if err != nil {
 		return nil, err
 	}
