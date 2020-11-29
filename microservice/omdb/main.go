@@ -5,7 +5,9 @@ import (
 	"log"
 	"net"
 	"omdb/config"
+	"omdb/database"
 	"omdb/handler"
+	logdb "omdb/log"
 	"omdb/logger"
 	"omdb/middleware"
 	"omdb/movie"
@@ -17,7 +19,9 @@ import (
 
 func main() {
 	conf := config.New()
-	dbLogger := logger.NewDBLogger("omdb")
+	db := database.NewMysqlDabatabase(conf)
+	logRepo := logdb.NewRepository(conf, db)
+	dbLogger := logger.NewDBLogger(conf, conf.ServiceName, logRepo)
 	rpcServer := grpc.NewServer(
 		grpc.UnaryInterceptor(
 			middleware.InterceptorWithDBLogger(dbLogger),
