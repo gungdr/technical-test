@@ -5,6 +5,8 @@ import (
 	"log"
 	"net"
 	"omdb/config"
+	"omdb/logger"
+	"omdb/middleware"
 	"omdb/movie"
 	"omdb/server"
 
@@ -13,9 +15,15 @@ import (
 )
 
 func main() {
-	rpcServer := grpc.NewServer()
-	router := gin.New()
 	conf := config.New()
+	dbLogger := logger.NewDBLogger("omdb")
+	rpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(
+			middleware.InterceptorWithDBLogger(dbLogger),
+		),
+	)
+	router := gin.New()
+	router.Use(middleware.WithDBLogger(dbLogger))
 	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", conf.RPCPort))
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

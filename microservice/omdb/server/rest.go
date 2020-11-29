@@ -53,7 +53,6 @@ func (s *restServer) Register() {
 		v1.GET("/search", func(c *gin.Context) {
 			pageQuery := c.DefaultQuery("p", "1")
 			keyword := c.Query("k")
-			size := c.
 			if keyword == "" || pageQuery == "" {
 				c.JSON(http.StatusBadRequest, response.Error(errors.New("Movie ID is required")))
 				return
