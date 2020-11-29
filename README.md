@@ -8,7 +8,7 @@ This is a repository to hold technical test requirments
 
 ## Requirments
 
-This project is written in `go v1.15`
+test requirment is in [here](documents)
 
 ## Contributing
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
