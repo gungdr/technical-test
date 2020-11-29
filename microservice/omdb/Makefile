@@ -8,5 +8,10 @@ run :
 	go run main.go
 test :
 	go test ./... -cover
+docker-build :
+	docker build -t omdb:latest .
+docker-run :
+	docker run -it -p 3000:3000 -p 4000:4000 omdb:latest
+
 
 
