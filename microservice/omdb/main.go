@@ -5,6 +5,7 @@ import (
 	"log"
 	"net"
 	"omdb/config"
+	"omdb/handler"
 	"omdb/logger"
 	"omdb/middleware"
 	"omdb/movie"
@@ -30,8 +31,10 @@ func main() {
 	}
 	movieClient := movie.NewClient(conf)
 	movieService := movie.NewService(movieClient)
-	movieRPCServer := server.NewRPCServer(rpcServer, conf, listener, movieService)
-	movieRestServer := server.NewRestServer(router, conf, movieService)
+	movieRPCHandler := handler.NewRPCHandler(conf, movieService)
+	movieRestHandler := handler.NewRestHandler(conf, movieService)
+	movieRPCServer := server.NewRPCServer(rpcServer, conf, listener, movieRPCHandler)
+	movieRestServer := server.NewRestServer(router, conf, movieRestHandler)
 	go movieRPCServer.Run()
 	movieRestServer.Run()
 

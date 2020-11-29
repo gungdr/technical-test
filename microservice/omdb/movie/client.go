@@ -87,6 +87,8 @@ func (c *client) Get(ctx context.Context, param map[string]string) (*MovieDetail
 		log.Println("Client Get:", err)
 		return nil, err
 	}
+	body := response.String()
+	log.Println(body)
 	err = json.Unmarshal([]byte(response.String()), &result)
 	if err != nil {
 		return nil, err

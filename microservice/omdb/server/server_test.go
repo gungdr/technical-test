@@ -2,14 +2,19 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
+	"net/http"
+	"net/http/httptest"
 	"omdb/config"
+	"omdb/handler"
 	"omdb/movie"
 	"omdb/proto"
 	"testing"
 	"time"
 
+	"github.com/gin-gonic/gin"
 	pbwrapper "github.com/golang/protobuf/ptypes/wrappers"
 	"github.com/google/uuid"
 	"google.golang.org/grpc/test/bufconn"
@@ -23,13 +28,20 @@ const bufSize = 1024 * 1024
 
 var lis *bufconn.Listener
 
+var router *gin.Engine
+
 func init() {
 	rpcServer := grpc.NewServer()
 	conf := config.New()
 	lis = bufconn.Listen(bufSize)
 	movieClient := movie.NewClient(conf)
 	movieService := movie.NewService(movieClient)
-	movieServer := NewRPCServer(rpcServer, conf, lis, movieService)
+	movieRPCHandler := handler.NewRPCHandler(conf, movieService)
+	movieServer := NewRPCServer(rpcServer, conf, lis, movieRPCHandler)
+	router = gin.New()
+	movieRestHandler := handler.NewRestHandler(conf, movieService)
+	movieRestServer := NewRestServer(router, conf, movieRestHandler)
+	go movieRestServer.Run()
 	go movieServer.Run()
 }
 
@@ -74,5 +86,29 @@ func Test_server_Get(t *testing.T) {
 	_, err = omdbClient.Get(ctx, &pbwrapper.StringValue{Value: "tt0048119"})
 	if err != nil {
 		log.Fatalf("could not greet: %v", err)
+	}
+}
+
+func Test_restHandler_Get(t *testing.T) {
+	ts := httptest.NewServer(router)
+	defer ts.Close()
+	resp, err := http.Get(fmt.Sprintf("%s/v1/movie/%s", ts.URL, "tt0120912"))
+	if err != nil {
+		t.Errorf("Should not error, got %v", err)
+	}
+	if resp.StatusCode != 200 {
+		t.Errorf("Expected status code 200, got %d", resp.StatusCode)
+	}
+}
+
+func Test_restHandler_Search(t *testing.T) {
+	ts := httptest.NewServer(router)
+	defer ts.Close()
+	resp, err := http.Get(fmt.Sprintf("%s/v1/search?k=Batman&p=1", ts.URL))
+	if err != nil {
+		t.Errorf("Should not error, got %v", err)
+	}
+	if resp.StatusCode != 200 {
+		t.Errorf("Expected status code 200, got %d", resp.StatusCode)
 	}
 }
