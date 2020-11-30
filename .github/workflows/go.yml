@@ -35,6 +35,7 @@ jobs:
         
     - name: Get dependencies & build proto
       run: |
+        cd microservice/omdb
         make init
         make gen
         
