@@ -23,7 +23,7 @@ jobs:
     
     - name : install protobuf compiler
       run : |
-        apt-get install -y protobuf-compiler
+        sudo apt-get install -y protobuf-compiler
         
     - name : add to PATH
       run : |
