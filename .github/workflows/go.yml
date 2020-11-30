@@ -26,15 +26,15 @@ jobs:
     - name : install protobuf compiler
       run : |
         sudo apt-get install -y protobuf-compiler 
-        
-    - name : add to PATH
-      run : |
-        PATH="$PATH:$(go env GOPATH)/bin"
     
     - name : install protoc
       working-directory: ${{env.working-directory}}
       run : |
         go get google.golang.org/protobuf/cmd/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc
+        
+    - name : add to PATH
+      run : |
+        PATH="$PATH:$(go env GOPATH)/bin"
         
     - name: Get dependencies & Build proto
       working-directory: ${{env.working-directory}}
