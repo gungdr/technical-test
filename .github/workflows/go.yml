@@ -28,8 +28,6 @@ jobs:
       with:
         # proto file places
         dir_with_proto_name: proto
-        # path to your generated contracts
-        path_generated: proto
         
     - name: Test
       working-directory: ${{env.working-directory}}
