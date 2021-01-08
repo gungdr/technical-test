@@ -23,26 +23,13 @@ jobs:
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
 
-    - name : install protobuf compiler
-      run : |
-        sudo apt-get install -y protobuf-compiler 
-    
-    - name : install protoc
-      working-directory: ${{env.working-directory}}
-      run : |
-        go get google.golang.org/protobuf/cmd/protoc-gen-go google.golang.org/grpc/cmd/protoc-gen-go-grpc
-        
-    - name : add to PATH
-      run : |
-        PATH="$PATH:$(go env GOPATH)/bin"
-        
-    - name: Get dependencies & Build proto
-      working-directory: ${{env.working-directory}}
-      run: |
-        make init
-        protoc --go_out=. \
-        --go-grpc_out=. \
-        proto/omdb.proto
+    - name: Proto compile golang
+      uses: kubitre/proto_action@v1.2
+      with:
+        # proto file places
+        dir_with_proto_name: proto
+        # path to your generated contracts
+        path_generated: .
         
     - name: Test
       working-directory: ${{env.working-directory}}
