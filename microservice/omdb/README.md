@@ -1,3 +1,4 @@
+![Go](https://github.com/gungdr/technical-test/workflows/Go/badge.svg)
 # Technical Test
 
 This is a repository to hold technical test requirments
