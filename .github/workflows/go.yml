@@ -22,13 +22,14 @@ jobs:
   
     - name: Check out code into the Go module directory
       uses: actions/checkout@v2
+    
+    - name: Setup protoc
+      uses: arduino/setup-protoc@v1.1.2
 
-    - name: Proto compile golang
-      uses: kubitre/proto_action@v1.2
-      with:
-        # proto file places
-        dir_with_proto_name: proto
-        
+    - name: Build Proto
+      working-directory: ${{env.working-directory}}
+      run: make gen
+    
     - name: Test
       working-directory: ${{env.working-directory}}
       run: go test -v ./...
