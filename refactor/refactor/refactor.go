@@ -15,3 +15,7 @@ func findFirstStringInBracket(word string) string {
 	}
 	return ""
 }
+
+func FindString(word string) string {
+	return findFirstStringInBracket(word)
+}
